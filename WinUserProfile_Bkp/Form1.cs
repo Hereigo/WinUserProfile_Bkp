@@ -20,17 +20,18 @@
         private void SetupDataGridView()
         {
             this.dataGridView1.Columns.Add("chk", "");
-            this.dataGridView1.Columns.Add("name", "Data For Bkp");
-            this.dataGridView1.Columns.Add("size", "Size of Data");
-            this.dataGridView1.Columns.Add("path", "Full Path To");
-            this.dataGridView1.Columns.Add("date", "Modification Date");
+            this.dataGridView1.Columns.Add("name", "Data Type");
+            this.dataGridView1.Columns["name"].DefaultCellStyle.Font = new System.Drawing.Font(Font, System.Drawing.FontStyle.Bold);
+            this.dataGridView1.Columns.Add("size", "Size");
+            this.dataGridView1.Columns.Add("path", "Full Path To Location");
+            this.dataGridView1.Columns.Add("date", "Modified");
             this.dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         }
 
 
         private void Form1_Load()
         {
-            this.Text = "Change Prperties Through Coding";
+            this.Text = "Win 7 & XP User Profile BackUp Tool";
             this.MaximizeBox = false;
             //this.BackColor = Color.Brown;
             //this.Size = new Size(350, 125);
@@ -41,13 +42,7 @@
 
         private void InitializeStartParams()
         {
-            String[] profilesFolders =
-            {
-                "C:\\Documents and Settings\\",
-                "C:\\Пользователи\\",
-                "C:\\Users\\"
-            };
-
+            String[] profilesFolders = {"C:\\Documents and Settings\\", "C:\\Пользователи\\", "C:\\Users\\"};
             try
             {
                 foreach (var profDir in profilesFolders)
@@ -58,6 +53,7 @@
                 if (profilesRootDir != "")
                 {
                     DirectoryInfo[] profiles = new DirectoryInfo(profilesRootDir).GetDirectories();
+
                     foreach (var item in profiles)
                     {
                         comboBox1.Items.Add(item.Name);
@@ -120,6 +116,15 @@
                 SearchDataForBkp(possibleBrowsersFavDirs, "*.url");
                 SearchDataForBkp(possibleOutlookSignDirs, "*.*");
                 SearchDataForBkp(possible1CcfgDirs, "ibases.v8i");
+            }
+        }
+
+
+        private void RecursingSignatureFolder(string path)
+        {
+            foreach (var file in new DirectoryInfo(path).GetFiles())
+            {
+
             }
         }
 
