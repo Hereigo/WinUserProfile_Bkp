@@ -6,8 +6,9 @@
 
     public partial class Form1 : Form
     {
-        public static string profilesRootDir = "";
-        public static string profileName;
+        public static string profilesRootDir;
+        public static string profileFullPath;
+        // public static string outlookPstPath;
 
         public Form1()
         {
@@ -77,17 +78,9 @@
             }
             else
             {
-                profileName = comboBox1.SelectedItem.ToString();
+                string selectedProfile = comboBox1.SelectedItem.ToString();
+                profileFullPath = profilesRootDir + selectedProfile;
 
-                SearchDataForBkp(profilesRootDir + profileName);
-            }
-        }
-
-
-        private void SearchDataForBkp(string profileFullPath)
-        {
-            try
-            {
                 string[] possibleOutlookPstDirs = {
                      profileFullPath + "\\Documents\\",
                      profileFullPath + "\\Documents\\Outlook Files\\",
@@ -97,20 +90,63 @@
                      profileFullPath +"\\Local Settings\\Application Data\\Microsoft\\Outlook\\"
                 };
 
-                long filesPstSize = 0;
+                string[] possibleBrowsersFavDirs = {
+                     profileFullPath + "\\Local Settings\\Application Data\\Google\\Chrome\\User Data\\Default\\",
+                     profileFullPath + "\\AppData\\Local\\Grome\\Chrome\\User Data\\Default\\",
+                     profileFullPath + "\\Favorites\\",
+                     profileFullPath + "\\Избранное\\"
+                };
 
-                foreach (var pstPath in possibleOutlookPstDirs)
+                SearchDataForBkp(possibleOutlookPstDirs, "*.pst");
+            }
+        }
+
+
+        private void SearchBrowsersFav(string profileFullPath)
+        {
+            try
+            {
+                // \\192.168.0.23\c$\Users\D.Mohylnitskyy\AppData\Roaming\Microsoft\Signatures\
+                // \\192.168.0.23\c$\Users\D.Mohylnitskyy\AppData\Roaming\1C\1CEStart\
+
+                //  Bookmarks
+                
+                
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(exc.Message, "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            }
+        }
+
+
+        private void SearchDataForBkp(string[] dirsForSearch, string fileMask)
+        {
+            try
+            {
+                long filesPstSize = 0;
+                DateTime yearAgoDate = DateTime.Now.AddYears(-1);
+
+                foreach (var pstPath in dirsForSearch)
                 {
                     if (Directory.Exists(pstPath))
                     {
-                        FileInfo[] filesPst = new DirectoryInfo(pstPath).GetFiles("*.pst");
+                        FileInfo[] filesPst = new DirectoryInfo(pstPath).GetFiles(fileMask);
 
                         for (int i = 0; i < filesPst.Length; i++)
                         {
                             filesPstSize += filesPst[i].Length;
+
+                            if (DateTime.Compare(filesPst[i].LastWriteTime, yearAgoDate) > -1)
+                            {
+                                yearAgoDate = filesPst[i].LastWriteTime;
+                                //outlookPstPath = pstPath;
+                            }
                         }
 
-                        label_Outlook_Size.Text = (filesPstSize / 1024 / 1024).ToString();
+                        label_Outlook_Size.Text = (filesPstSize / 1024 / 1024).ToString() + " (" + yearAgoDate + ")";
+                        label_4outlookPstPath.Text = pstPath;
                     }
                 }
             }
