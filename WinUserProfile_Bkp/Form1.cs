@@ -8,12 +8,23 @@
     {
         public static string profilesRootDir;
         public static string profileFullPath;
-        // public static string outlookPstPath;
 
         public Form1()
         {
             InitializeComponent();
             Form1_Load();
+            SetupDataGridView();
+        }
+
+
+        private void SetupDataGridView()
+        {
+            this.dataGridView1.Columns.Add("chk", "");
+            this.dataGridView1.Columns.Add("name", "Data For Bkp");
+            this.dataGridView1.Columns.Add("size", "Size of Data");
+            this.dataGridView1.Columns.Add("path", "Full Path To");
+            this.dataGridView1.Columns.Add("date", "Modification Date");
+            this.dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
         }
 
 
@@ -46,7 +57,11 @@
 
                 if (profilesRootDir != "")
                 {
-                    loadProfListToCombo(profilesRootDir);
+                    DirectoryInfo[] profiles = new DirectoryInfo(profilesRootDir).GetDirectories();
+                    foreach (var item in profiles)
+                    {
+                        comboBox1.Items.Add(item.Name);
+                    }
                 }
                 else
                 {
@@ -56,16 +71,6 @@
             catch (Exception exc)
             {
                 MessageBox.Show("Oooops!... " + exc.Message);
-            }
-        }
-
-
-        private void loadProfListToCombo(string profDir)
-        {
-            DirectoryInfo[] profiles = new DirectoryInfo(profDir).GetDirectories();
-            foreach (var item in profiles)
-            {
-                comboBox1.Items.Add(item.Name);
             }
         }
 
@@ -92,31 +97,29 @@
 
                 string[] possibleBrowsersFavDirs = {
                      profileFullPath + "\\Local Settings\\Application Data\\Google\\Chrome\\User Data\\Default\\",
-                     profileFullPath + "\\AppData\\Local\\Grome\\Chrome\\User Data\\Default\\",
+                     profileFullPath + "\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\",
+                     profileFullPath + "\\AppData\\Local\\Chromium\\User Data\\Default\\",
                      profileFullPath + "\\Favorites\\",
                      profileFullPath + "\\Избранное\\"
                 };
 
+                string[] possibleOutlookSignDirs =
+                {
+                    profileFullPath + "\\AppData\\Roaming\\Microsoft\\Signatures\\",
+                    profileFullPath + "\\Application Data\\Microsoft\\Signatures\\"
+                };
+
+                string[] possible1CcfgDirs =
+                {
+                    profileFullPath + "\\AppData\\Roaming\\1C\\1CEStart\\",
+                    profileFullPath + "\\Application Data\\1C\\1CEStart\\"
+                };
+
                 SearchDataForBkp(possibleOutlookPstDirs, "*.pst");
-            }
-        }
-
-
-        private void SearchBrowsersFav(string profileFullPath)
-        {
-            try
-            {
-                // \\192.168.0.23\c$\Users\D.Mohylnitskyy\AppData\Roaming\Microsoft\Signatures\
-                // \\192.168.0.23\c$\Users\D.Mohylnitskyy\AppData\Roaming\1C\1CEStart\
-
-                //  Bookmarks
-                
-                
-            }
-            catch (Exception exc)
-            {
-                MessageBox.Show(exc.Message, "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+                SearchDataForBkp(possibleBrowsersFavDirs, "Bookmarks*");
+                SearchDataForBkp(possibleBrowsersFavDirs, "*.url");
+                SearchDataForBkp(possibleOutlookSignDirs, "*.*");
+                SearchDataForBkp(possible1CcfgDirs, "ibases.v8i");
             }
         }
 
@@ -125,8 +128,9 @@
         {
             try
             {
-                long filesPstSize = 0;
-                DateTime yearAgoDate = DateTime.Now.AddYears(-1);
+                long serchingFilesSize = 0;
+                DateTime SearchingFilesDate = DateTime.Now.AddYears(-1);
+                string path = "";
 
                 foreach (var pstPath in dirsForSearch)
                 {
@@ -136,19 +140,27 @@
 
                         for (int i = 0; i < filesPst.Length; i++)
                         {
-                            filesPstSize += filesPst[i].Length;
+                            serchingFilesSize += filesPst[i].Length;
 
-                            if (DateTime.Compare(filesPst[i].LastWriteTime, yearAgoDate) > -1)
+                            if (DateTime.Compare(filesPst[i].LastWriteTime, SearchingFilesDate) > -1)
                             {
-                                yearAgoDate = filesPst[i].LastWriteTime;
-                                //outlookPstPath = pstPath;
+                                SearchingFilesDate = filesPst[i].LastWriteTime;
+                                path = pstPath;
                             }
                         }
-
-                        label_Outlook_Size.Text = (filesPstSize / 1024 / 1024).ToString() + " (" + yearAgoDate + ")";
-                        label_4outlookPstPath.Text = pstPath;
                     }
                 }
+
+                // TODO:  OPTIMIZE THIS !!!!!!!!
+                // TODO:  OPTIMIZE THIS !!!!!!!!
+                // TODO:  OPTIMIZE THIS !!!!!!!!
+
+                string sizeInStr;
+                if (serchingFilesSize < 1024) sizeInStr = serchingFilesSize + " bytes.";
+                else if ((serchingFilesSize / 1024) < 1024) sizeInStr = serchingFilesSize / 1024 + " KB.";
+                else sizeInStr = (serchingFilesSize / 1024 / 1024) + " MB.";
+
+                dataGridView1.Rows.Add("", fileMask, sizeInStr, path, SearchingFilesDate);
             }
             catch (Exception exc)
             {

@@ -31,17 +31,15 @@
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.label_Outlook_Size = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label_4outlookPstPath = new System.Windows.Forms.Label();
-            this.groupBox1.SuspendLayout();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 15);
+            this.label1.Location = new System.Drawing.Point(106, 15);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(150, 13);
             this.label1.TabIndex = 0;
@@ -58,67 +56,39 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 41);
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.Location = new System.Drawing.Point(109, 41);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(150, 23);
+            this.button1.Size = new System.Drawing.Size(316, 23);
             this.button1.TabIndex = 2;
             this.button1.Text = "2. Search Data For BackUp";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_SearchDataForBkp);
             // 
-            // label_Outlook_Size
+            // dataGridView1
             // 
-            this.label_Outlook_Size.AutoSize = true;
-            this.label_Outlook_Size.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label_Outlook_Size.Location = new System.Drawing.Point(147, 20);
-            this.label_Outlook_Size.Name = "label_Outlook_Size";
-            this.label_Outlook_Size.Size = new System.Drawing.Size(14, 13);
-            this.label_Outlook_Size.TabIndex = 3;
-            this.label_Outlook_Size.Text = "0";
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(6, 19);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(148, 17);
-            this.checkBox1.TabIndex = 4;
-            this.checkBox1.Text = "Outlook PST Files   (MB.) ";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.label_4outlookPstPath);
-            this.groupBox1.Controls.Add(this.label_Outlook_Size);
-            this.groupBox1.Controls.Add(this.checkBox1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 71);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(413, 117);
-            this.groupBox1.TabIndex = 5;
-            this.groupBox1.TabStop = false;
-            // 
-            // label_4outlookPstPath
-            // 
-            this.label_4outlookPstPath.AutoSize = true;
-            this.label_4outlookPstPath.Location = new System.Drawing.Point(6, 39);
-            this.label_4outlookPstPath.Name = "label_4outlookPstPath";
-            this.label_4outlookPstPath.Size = new System.Drawing.Size(0, 13);
-            this.label_4outlookPstPath.TabIndex = 6;
+            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Location = new System.Drawing.Point(12, 79);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.Size = new System.Drawing.Size(413, 170);
+            this.dataGridView1.TabIndex = 3;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(437, 261);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -129,10 +99,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label_Outlook_Size;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label_4outlookPstPath;
+        private System.Windows.Forms.DataGridView dataGridView1;
     }
 }
 
