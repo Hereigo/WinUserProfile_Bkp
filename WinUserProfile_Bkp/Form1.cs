@@ -42,7 +42,7 @@
 
         private void InitializeStartParams()
         {
-            String[] profilesFolders = {"C:\\Documents and Settings\\", "C:\\Пользователи\\", "C:\\Users\\"};
+            String[] profilesFolders = { "C:\\Documents and Settings\\", "C:\\Пользователи\\", "C:\\Users\\" };
             try
             {
                 foreach (var profDir in profilesFolders)
@@ -79,6 +79,9 @@
             }
             else
             {
+                // CLEAR DGV BEFORE FILL IT !
+                if (dataGridView1.Rows.Count > 1) dataGridView1.Rows.Clear();
+
                 string selectedProfile = comboBox1.SelectedItem.ToString();
                 profileFullPath = profilesRootDir + selectedProfile;
 
@@ -134,7 +137,7 @@
             try
             {
                 long serchingFilesSize = 0;
-                DateTime SearchingFilesDate = DateTime.Now.AddYears(-1);
+                DateTime SearchingFilesDate = DateTime.Parse("01.01.01");
                 string path = "";
 
                 foreach (var pstPath in dirsForSearch)
@@ -165,7 +168,7 @@
                 else if ((serchingFilesSize / 1024) < 1024) sizeInStr = serchingFilesSize / 1024 + " KB.";
                 else sizeInStr = (serchingFilesSize / 1024 / 1024) + " MB.";
 
-                dataGridView1.Rows.Add("", fileMask, sizeInStr, path, SearchingFilesDate);
+                dataGridView1.Rows.Add("", fileMask, sizeInStr, path, SearchingFilesDate.ToShortDateString());
             }
             catch (Exception exc)
             {
