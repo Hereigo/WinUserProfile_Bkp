@@ -1,13 +1,17 @@
 ﻿namespace WinUserProfile_Bkp
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
+    using System.Linq;
+    using System.Security.AccessControl;
     using System.Windows.Forms;
 
     public partial class Form1 : Form
     {
         public static string profilesRootDir;
         public static string profileFullPath;
+        public static string resultFolderForeachSearch = "";
 
         public Form1()
         {
@@ -79,25 +83,33 @@
             }
             else
             {
-                // CLEAR DGV BEFORE FILL IT !
+                // CLEAR D.G.V. BEFORE FILL IT !
                 if (dataGridView1.Rows.Count > 1) dataGridView1.Rows.Clear();
 
                 string selectedProfile = comboBox1.SelectedItem.ToString();
                 profileFullPath = profilesRootDir + selectedProfile;
 
                 string[] possibleOutlookPstDirs = {
-                     profileFullPath + "\\Documents\\",
                      profileFullPath + "\\Documents\\Outlook Files\\",
                      profileFullPath + "\\Documents\\Файлы Outlook\\",
                      profileFullPath + "\\Documents\\Файли Outlook\\",
                      profileFullPath + "\\AppData\\Local\\Microsoft\\Outlook\\",
                      profileFullPath +"\\Local Settings\\Application Data\\Microsoft\\Outlook\\"
+                     
+                     // profileFullPath + "\\Documents\\"  
+
+                     // Acces Denied !!! on Win 7...10  !!!!!!!!!
+                     // Acces Denied !!! on Win 7...10  !!!!!!!!!
+                     // Acces Denied !!! on Win 7...10  !!!!!!!!!
                 };
 
-                string[] possibleBrowsersFavDirs = {
+                string[] possibleChromeFavDirs = {
                      profileFullPath + "\\Local Settings\\Application Data\\Google\\Chrome\\User Data\\Default\\",
                      profileFullPath + "\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\",
-                     profileFullPath + "\\AppData\\Local\\Chromium\\User Data\\Default\\",
+                     profileFullPath + "\\AppData\\Local\\Chromium\\User Data\\Default\\"
+                };
+
+                string[] possibleIExplorerFavDirs = {
                      profileFullPath + "\\Favorites\\",
                      profileFullPath + "\\Избранное\\"
                 };
@@ -115,65 +127,210 @@
                 };
 
                 SearchDataForBkp(possibleOutlookPstDirs, "*.pst");
-                SearchDataForBkp(possibleBrowsersFavDirs, "Bookmarks*");
-                SearchDataForBkp(possibleBrowsersFavDirs, "*.url");
+                SearchDataForBkp(possibleChromeFavDirs, "Bookmarks*");
+                SearchDataForBkp(possibleIExplorerFavDirs, "*.url");
                 SearchDataForBkp(possibleOutlookSignDirs, "*.*");
                 SearchDataForBkp(possible1CcfgDirs, "ibases.v8i");
+
+                string[] myDoxPathes =
+                {
+                    profileFullPath + "\\Documents\\",
+                    profileFullPath + "\\My Documents\\",
+                    profileFullPath + "\\Мои Документы\\",
+                    profileFullPath + "\\Мої Документи\\"
+                };
+
+                string[] myDeskPathes =
+                {
+                    profileFullPath + "\\Desktop\\",
+                    profileFullPath + "\\My Desktop\\",
+                    profileFullPath + "\\Рабочий стол\\",
+                    profileFullPath + "\\Робочий стіл\\"
+                };
+
+                SearchDoxAndDesk(myDoxPathes);
+                SearchDoxAndDesk(myDeskPathes);
             }
         }
 
-
-        private void RecursingSignatureFolder(string path)
+        private void SearchDoxAndDesk(string[] myDoxPathes)
         {
-            foreach (var file in new DirectoryInfo(path).GetFiles())
+            foreach (string usersFolder in myDoxPathes)
             {
+                if (Directory.Exists(usersFolder))
+                {
+                    DirectoryInfo di = new DirectoryInfo(usersFolder);
+                    long dirSize = 0;
+                    try
+                    {
+                        dirSize = di.EnumerateFiles("*.*").Sum(fi => fi.Length);
+                        // TODO: HAVE TO CHECK ACCESS ALLOWED !!!
+                        // TODO: HAVE TO CHECK ACCESS ALLOWED !!!
+                        // TODO: HAVE TO CHECK ACCESS ALLOWED !!!
+                        // dirSize = di.EnumerateFiles("*.*", SearchOption.AllDirectories).Sum(fi => fi.Length);
+                    }
+                    catch (Exception exc)
+                    {
+                        MessageBox.Show(exc.Message);
+                    }
 
+                    if (dirSize > 0)
+                    {
+                        string sizeInStr;
+                        if (dirSize < 1024) sizeInStr = dirSize + " bytes.";
+                        else if ((dirSize / 1024) < 1024) sizeInStr = dirSize / 1024 + " KB.";
+                        else sizeInStr = (dirSize / 1024 / 1024) + " MB.";
+                        dataGridView1.Rows.Add("", di.Name, sizeInStr, di.FullName, di.LastAccessTime.ToShortDateString());
+                    }
+                }
             }
         }
-
 
         private void SearchDataForBkp(string[] dirsForSearch, string fileMask)
         {
             try
             {
-                long serchingFilesSize = 0;
-                DateTime SearchingFilesDate = DateTime.Parse("01.01.01");
+                long serchingDataSize = 0;
+                DateTime searchingFileDate = DateTime.Parse("01.01.01");
                 string path = "";
 
-                foreach (var pstPath in dirsForSearch)
+                foreach (var currentDir in dirsForSearch)
                 {
-                    if (Directory.Exists(pstPath))
+                    if (Directory.Exists(currentDir))
                     {
-                        FileInfo[] filesPst = new DirectoryInfo(pstPath).GetFiles(fileMask);
+                        // PROTECT ROOT FOLDER SETTINGS FROM CHANGE BY RECURSE:
+                        if (resultFolderForeachSearch == "") resultFolderForeachSearch = currentDir;
 
-                        for (int i = 0; i < filesPst.Length; i++)
-                        {
-                            serchingFilesSize += filesPst[i].Length;
-
-                            if (DateTime.Compare(filesPst[i].LastWriteTime, SearchingFilesDate) > -1)
-                            {
-                                SearchingFilesDate = filesPst[i].LastWriteTime;
-                                path = pstPath;
-                            }
-                        }
+                        recursiveSearch(currentDir, fileMask, ref serchingDataSize, ref searchingFileDate, ref path);
                     }
                 }
-
                 // TODO:  OPTIMIZE THIS !!!!!!!!
                 // TODO:  OPTIMIZE THIS !!!!!!!!
                 // TODO:  OPTIMIZE THIS !!!!!!!!
-
                 string sizeInStr;
-                if (serchingFilesSize < 1024) sizeInStr = serchingFilesSize + " bytes.";
-                else if ((serchingFilesSize / 1024) < 1024) sizeInStr = serchingFilesSize / 1024 + " KB.";
-                else sizeInStr = (serchingFilesSize / 1024 / 1024) + " MB.";
+                if (serchingDataSize < 1024) sizeInStr = serchingDataSize + " bytes.";
+                else if ((serchingDataSize / 1024) < 1024) sizeInStr = serchingDataSize / 1024 + " KB.";
+                else sizeInStr = (serchingDataSize / 1024 / 1024) + " MB.";
 
-                dataGridView1.Rows.Add("", fileMask, sizeInStr, path, SearchingFilesDate.ToShortDateString());
+                dataGridView1.Rows.Add("", fileMask, sizeInStr, resultFolderForeachSearch, searchingFileDate.ToShortDateString());
+
+                // CLEAR ROOT FOLDER FOR THE NEXT SEARCH CYCLE:
+                resultFolderForeachSearch = "";
+
             }
             catch (Exception exc)
             {
                 MessageBox.Show(exc.Message, "Warning!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+
+        private static void recursiveSearch(string currentDir, string fileMask, ref long serchingDataSize, ref DateTime mostFreshDate, ref string path)
+        {
+            FileInfo[] searchingFiles = new DirectoryInfo(currentDir).GetFiles(fileMask);
+
+            for (int i = 0; i < searchingFiles.Length; i++)
+            {
+                serchingDataSize += searchingFiles[i].Length;
+
+                if (DateTime.Compare(searchingFiles[i].LastWriteTime, mostFreshDate) > -1)
+                {
+                    mostFreshDate = searchingFiles[i].LastWriteTime;
+                    path = currentDir;
+                }
+            }
+
+            DirectoryInfo[] subDirsHere = new DirectoryInfo(currentDir).GetDirectories();
+
+            foreach (DirectoryInfo dir in subDirsHere)
+            {
+                recursiveSearch(dir.FullName, fileMask, ref serchingDataSize, ref mostFreshDate, ref path);
+            }
+        }
+
+
+        public static bool FolderCanRead(string path)
+        {
+            var readAllow = false;
+            var readDeny = false;
+            var accessControlList = Directory.GetAccessControl(path);
+            if (accessControlList == null)
+                return false;
+            var accessRules = accessControlList.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
+            if (accessRules == null)
+                return false;
+
+            foreach (FileSystemAccessRule rule in accessRules)
+            {
+                if ((FileSystemRights.Read & rule.FileSystemRights) != FileSystemRights.Read) continue;
+
+                if (rule.AccessControlType == AccessControlType.Allow)
+                    readAllow = true;
+                else if (rule.AccessControlType == AccessControlType.Deny)
+                    readDeny = true;
+            }
+
+            return readAllow && !readDeny;
+        }
+
+        private void button_RunZip_Click(object sender, EventArgs e)
+        {
+            const string wRar = @"C:\Progra~1\WinRAR\Rar.exe";
+
+            //// string userName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + archName + ".RAR";
+
+            ////String path = root + comboBox1.SelectedItem + "\\" + dirFrom;
+
+            //String zipParams = "m[f] -ms -rr3p " + excluMask + " -r -t \"" + textBox1.Text + "\\" + userName + "\" \"" + path + "\\*." + incluMask + "\"";
+
+            //ProcessStartInfo psi = new ProcessStartInfo(rarPath, zipParams);
+            //Process.Start(psi).WaitForExit();
+
+            try
+            {
+                for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
+                {
+                    if (!String.IsNullOrWhiteSpace(dataGridView1[3, i].Value.ToString()))
+                    {
+                        string mask;
+                        if (dataGridView1[1, i].Value.ToString().Contains("*.pst")) mask = "*.pst";
+                        else if (dataGridView1[1, i].Value.ToString().Contains("*.url")) mask = "*.url";
+                        else if (dataGridView1[1, i].Value.ToString().Contains("Bookmarks*")) mask = "Bookmarks*";
+                        else if (dataGridView1[1, i].Value.ToString().Contains("ibases.v8i")) mask = "ibases.v8i";
+                        // Special For myDoxPathes;
+                        // Special For myDeskPathes;
+                        else mask = "*.*";
+
+                        string archiveName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + mask.Replace("*", "").ToUpper() + ".RAR";
+
+                        // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
+                        // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
+                        // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
+
+
+
+                        //  PATH = dataGridView1[3, i].Value.ToString();
+                    }
+
+
+                }
+
+                //Process.Start(dataGridView1[3, 0].Value.ToString());
+
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Ooops!... " + exc);
+            }
+
+            //SearchDataForBkp(possibleOutlookPstDirs, "*.pst");
+            //SearchDataForBkp(possibleChromeFavDirs, "Bookmarks*");
+            //SearchDataForBkp(possibleIExplorerFavDirs, "*.url");
+            //SearchDataForBkp(possibleOutlookSignDirs, "*.*");
+            //SearchDataForBkp(possible1CcfgDirs, "ibases.v8i");
+
+            //SearchDoxAndDesk(myDoxPathes);
+            //SearchDoxAndDesk(myDeskPathes);
         }
     }
 }
