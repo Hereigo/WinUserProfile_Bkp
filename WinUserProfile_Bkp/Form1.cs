@@ -5,6 +5,7 @@
     using System.IO;
     using System.Linq;
     using System.Security.AccessControl;
+    using System.Text.RegularExpressions;
     using System.Windows.Forms;
 
     public partial class Form1 : Form
@@ -286,6 +287,9 @@
             //ProcessStartInfo psi = new ProcessStartInfo(rarPath, zipParams);
             //Process.Start(psi).WaitForExit();
 
+            string an = "";
+            string pth = "";
+
             try
             {
                 for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
@@ -301,19 +305,32 @@
                         // Special For myDeskPathes;
                         else mask = "*.*";
 
-                        string archiveName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + mask.Replace("*", "").ToUpper() + ".RAR";
+                        // TODO: USE LAST-FOLDER For ArchiveName Except Of MASK
+                        // TODO: USE LAST-FOLDER For ArchiveName Except Of MASK
+                        // TODO: USE LAST-FOLDER For ArchiveName Except Of MASK
+                        //  ([A-Z a-z А-Я а-я 0-9 і І ї Ї є Є _ \( \) \[ \] \- # \$ \~ \! \? \& \` \' \.]+)\.+([a-z A-Z]+)$
+
+                        Match match = Regex.Match(dataGridView1[3, i].Value.ToString(), @"[\\][\w\s]{0,22}[\\]$");
+
+                        string currRooDirName = match.ToString().Replace("\\", "").Replace(" ", "_");
+
+                        string archiveName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + currRooDirName + ".rar";
 
                         // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
                         // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
                         // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
 
 
+                        an = archiveName;
+                        pth = dataGridView1[3, i].Value.ToString();
 
                         //  PATH = dataGridView1[3, i].Value.ToString();
                     }
 
 
                 }
+
+                MessageBox.Show("Arch: " + an + " - ArchPath: " + pth);
 
                 //Process.Start(dataGridView1[3, 0].Value.ToString());
 
