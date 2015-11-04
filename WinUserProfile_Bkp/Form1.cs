@@ -90,6 +90,10 @@
                 string selectedProfile = comboBox1.SelectedItem.ToString();
                 profileFullPath = profilesRootDir + selectedProfile;
 
+                // TODO: ADD  Autocomplition file SPSCROLL.DAT in this DIR !!!
+                // TODO: ADD  Autocomplition file SPSCROLL.DAT in this DIR !!!
+                // TODO: ADD  Autocomplition file SPSCROLL.DAT in this DIR !!!
+
                 string[] possibleOutlookPstDirs = {
                      profileFullPath + "\\Documents\\Outlook Files\\",
                      profileFullPath + "\\Documents\\Файлы Outlook\\",
@@ -149,8 +153,30 @@
                     profileFullPath + "\\Робочий стіл\\"
                 };
 
+                string[] possibleOutlookNkXmlDirs = {
+                     profileFullPath +"\\Application Data\\Microsoft\\Outlook\\"
+                };
+
+                // TODO: WTF!?!?! REFACTOR THIS !!!!
+                // TODO: WTF!?!?! REFACTOR THIS !!!!
+                // TODO: WTF!?!?! REFACTOR THIS !!!!
+
                 SearchDoxAndDesk(myDoxPathes);
                 SearchDoxAndDesk(myDeskPathes);
+                SearchDoxAndDesk(possibleOutlookNkXmlDirs);
+
+                // TODO:  SAVE WALLPAPERS !!!!
+                // TODO:  SAVE WALLPAPERS !!!!
+                // TODO:  SAVE WALLPAPERS !!!!
+
+                // TODO:  ADD  \\UserName\\Recent\\ !!!!!!!
+                // TODO:  ADD  \\UserName\\Recent\\ !!!!!!!
+                // TODO:  ADD  \\UserName\\Recent\\ !!!!!!!
+
+                string[] wallpapersPath =
+                {
+                    profileFullPath +"\\Local Settings\\Application Data\\Microsoft\\"
+                };
             }
         }
 
@@ -278,17 +304,11 @@
         {
             const string wRar = @"C:\Progra~1\WinRAR\Rar.exe";
 
-            //// string userName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + archName + ".RAR";
+            // TODO: REFACTOR SAVE-PATH TOTALLY !!!!!!
+            // TODO: REFACTOR SAVE-PATH TOTALLY !!!!!!
+            // TODO: REFACTOR SAVE-PATH TOTALLY !!!!!!
 
-            ////String path = root + comboBox1.SelectedItem + "\\" + dirFrom;
-
-            //String zipParams = "m[f] -ms -rr3p " + excluMask + " -r -t \"" + textBox1.Text + "\\" + userName + "\" \"" + path + "\\*." + incluMask + "\"";
-
-            //ProcessStartInfo psi = new ProcessStartInfo(rarPath, zipParams);
-            //Process.Start(psi).WaitForExit();
-
-            string an = "";
-            string pth = "";
+            string saveDir = "C:\\temp\\";
 
             try
             {
@@ -296,58 +316,57 @@
                 {
                     if (!String.IsNullOrWhiteSpace(dataGridView1[3, i].Value.ToString()))
                     {
-                        string mask;
-                        if (dataGridView1[1, i].Value.ToString().Contains("*.pst")) mask = "*.pst";
-                        else if (dataGridView1[1, i].Value.ToString().Contains("*.url")) mask = "*.url";
-                        else if (dataGridView1[1, i].Value.ToString().Contains("Bookmarks*")) mask = "Bookmarks*";
-                        else if (dataGridView1[1, i].Value.ToString().Contains("ibases.v8i")) mask = "ibases.v8i";
-                        // Special For myDoxPathes;
-                        // Special For myDeskPathes;
-                        else mask = "*.*";
+                        try
+                        {
+                            if (!Directory.Exists(saveDir)) Directory.CreateDirectory(saveDir);
 
-                        // TODO: USE LAST-FOLDER For ArchiveName Except Of MASK
-                        // TODO: USE LAST-FOLDER For ArchiveName Except Of MASK
-                        // TODO: USE LAST-FOLDER For ArchiveName Except Of MASK
-                        //  ([A-Z a-z А-Я а-я 0-9 і І ї Ї є Є _ \( \) \[ \] \- # \$ \~ \! \? \& \` \' \.]+)\.+([a-z A-Z]+)$
+                            string mask;
+                            if (dataGridView1[1, i].Value.ToString().Contains("*.pst")) mask = "*.pst";
+                            else if (dataGridView1[1, i].Value.ToString().Contains("*.url")) mask = "*.url";
+                            else if (dataGridView1[1, i].Value.ToString().Contains("Bookmarks*")) mask = "Bookmarks*";
+                            else if (dataGridView1[1, i].Value.ToString().Contains("ibases.v8i")) mask = "ibases.v8i";
+                            // Special For myDoxPathes;
+                            // Special For myDeskPathes;
+                            else mask = "*.*";
 
-                        Match match = Regex.Match(dataGridView1[3, i].Value.ToString(), @"[\\][\w\s]{0,22}[\\]$");
+                            string pattern = @"[\\][\w\s]{0,22}[\\]$";
 
-                        string currRooDirName = match.ToString().Replace("\\", "").Replace(" ", "_");
+                            Match match = Regex.Match(dataGridView1[3, i].Value.ToString(), pattern);
 
-                        string archiveName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + currRooDirName + ".rar";
+                            string currRooDirName = match.ToString().Replace("\\", "").Replace(" ", "_");
 
-                        // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
-                        // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
-                        // TODO: EXCLUDE - AVI, MPEG4, MP3,  . . . ????  !!!!!!!!!!
+                            string archiveName = comboBox1.SelectedItem.ToString().Replace(' ', '_') + "_" + currRooDirName + ".rar";
 
+                            // TODO: EXCLUDE FILES SIZE-LIMITED OVER 205 MB !!!
+                            // TODO: EXCLUDE FILES SIZE-LIMITED OVER 205 MB !!!
+                            // TODO: EXCLUDE FILES SIZE-LIMITED OVER 205 MB !!!
 
-                        an = archiveName;
-                        pth = dataGridView1[3, i].Value.ToString();
+                            string excluMask = "-xThumbs.db -x*.mp3 -x*.wma -x*.wav -x*.ogg -x*.flac -x*.ra -x*.rm -x*.avi -x*.mkv" +
+                                            " -x*.flv -x*.vob -x*.mov -x*.wmv -x*.mpg -x*.mpe -x*.mpeg -x*.3gp -x*.exe -x*.dll";
 
-                        //  PATH = dataGridView1[3, i].Value.ToString();
+                            // -x@<lf> Exclude files listed in the specified list file.
+                            // rar a -x@exlist.txt arch *.exe
+
+                            //                                 -sl210000000 = Size Less 200 MB
+                            string zipParams = "m[f] -ms -rr5p -sl210000000 " + excluMask + " -r -t -dh " + saveDir + archiveName + " \"" +
+                                dataGridView1[3, i].Value.ToString() + "\\" + mask + "\"";
+
+                            // RUN WINRAR HERE FOR ARCHIVING ...
+                            ProcessStartInfo psi = new ProcessStartInfo(wRar, zipParams);
+                            Process.Start(psi).WaitForExit();
+
+                        }
+                        catch (Exception exc)
+                        {
+                            MessageBox.Show(exc.ToString());
+                        }
                     }
-
-
                 }
-
-                MessageBox.Show("Arch: " + an + " - ArchPath: " + pth);
-
-                //Process.Start(dataGridView1[3, 0].Value.ToString());
-
             }
             catch (Exception exc)
             {
                 MessageBox.Show("Ooops!... " + exc);
             }
-
-            //SearchDataForBkp(possibleOutlookPstDirs, "*.pst");
-            //SearchDataForBkp(possibleChromeFavDirs, "Bookmarks*");
-            //SearchDataForBkp(possibleIExplorerFavDirs, "*.url");
-            //SearchDataForBkp(possibleOutlookSignDirs, "*.*");
-            //SearchDataForBkp(possible1CcfgDirs, "ibases.v8i");
-
-            //SearchDoxAndDesk(myDoxPathes);
-            //SearchDoxAndDesk(myDeskPathes);
         }
     }
 }
